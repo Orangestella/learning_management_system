@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='stylesheets/login.css') }}">
+    <title>Login</title>
+</head>
+<body>
+<header>Learning Management System</header>
+<h4>Login</h4>
+<form method="post">
+    <div class="username"><label for="firstname">Firstname</label><input type="text" id="firstname" name="firstname" class="name"></div>
+    <div class="username"><label for="lastname">Lastname</label><input type="text" id="lastname" name="lastname" class="name"></div>
+    <div><label for="id">ID number</label><input type="number" id="id" name="id" class="non-name"></div>
+    <div><label for="psw">Password</label><input type="password" id="psw" name="psw" class="non-name"></div>
+    <br>
+    <div><input type="submit" id="login" value="Log in" class="login"></div>
+</form>
+
+</body>
+</html>

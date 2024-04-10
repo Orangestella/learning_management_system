@@ -1,0 +1,48 @@
+header{
+    background-color: #0000A0;
+    color: white;
+    height: 0;
+    width: 100%;
+    font-size: 240%;
+    text-align: left;
+    padding-left: 3%;
+    padding-top: 2%;
+    padding-bottom: 6%;
+}
+.username{
+    display: inline-block;
+}
+
+.name{
+    width: 110%;
+    height: 110%;
+}
+
+.non-name{
+    width: 25%;
+    height: 110%;
+}
+
+h4{
+    font-size: 288%;
+    margin-left: 3%;
+}
+
+form{
+    margin-left: 2%;
+    height: 80%;
+}
+
+label{
+    display: block;
+}
+
+form > * {
+  margin: 1%;
+    font-size: 166%;
+}
+
+.login{
+    width: 10%;
+    font-size: 90%;
+}
