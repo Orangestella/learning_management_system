@@ -2,21 +2,28 @@ import flask
 from flask import Flask, session
 import utils
 import mysql.connector
+import configparser
 
-cnx = mysql.connector.connect(user='root',
-                              password='SECRET', host='127.0.0.1',
-                              database='learn_manage')
+config = configparser.ConfigParser()
+config.read('config.ini')
+cnx = mysql.connector.connect(user=config["DATABASE"]["User"],
+                              password=config["DATABASE"]["Password"], host=config["DATABASE"]["Host"],
+                              database=config["DATABASE"]["Database"])
 cursor = cnx.cursor()
 
 app = Flask(__name__)
-app.secret_key = 'SECRET'
+app.secret_key = config["SESSION"]["Secret_key"]
 
 
 @app.route('/')
 def index():  # put application's code here
-    if 'userid' not in session:
+    if not flask.request.cookies.get("userid") and 'userid' not in session:
+        print(flask.request.cookies.get("userid"))
         return flask.redirect("/login")
     else:
+        if "userid" not in session:
+            session["userid"] = int(flask.request.cookies.get("userid"))
+            print(int(flask.request.cookies.get("userid")))
         return flask.render_template("index.html", id=session["userid"])
 
 
@@ -37,7 +44,11 @@ def login():
             return flask.jsonify({'status': 'error', 'message': 'Incorrect information, please try again after check.'})
         else:
             session['userid'] = id
-            return flask.jsonify({'status': 'success', 'message': 'Welcome!'})
+            resp = flask.make_response(flask.jsonify({'status': 'success', 'message': 'Welcome!'}))
+            print(values)
+            resp.set_cookie('userid', str(id), max_age=36000)
+            print("cookie set")
+            return resp
 
 
 
