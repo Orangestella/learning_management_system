@@ -9,7 +9,7 @@ $(document).ready(function() {
                 if (data.status === 'error') {
                    swal("Fail to login", data.message, "error");
                 } else {
-                    window.location.href = '/';  // 或者你想要跳转的页面
+                    window.location.href = '/';
                 }
             }
         });
