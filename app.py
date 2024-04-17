@@ -1,5 +1,5 @@
 import flask
-from flask import Flask, session
+from flask import Flask, session, request, make_response
 import utils
 import mysql.connector
 import configparser
@@ -24,7 +24,28 @@ def index():  # put application's code here
         if "userid" not in session:
             session["userid"] = int(flask.request.cookies.get("userid"))
             print(int(flask.request.cookies.get("userid")))
-        return flask.render_template("index.html", id=session["userid"])
+        query = "SELECT role_id, firstname FROM users WHERE id=%s"
+        value = (session["userid"],)
+        cursor.execute(query, value)
+        result = cursor.fetchone()
+        fname = result[1]
+        print(result)
+        if result[0] == 0:  # Admin
+            query = "SELECT COUNT(*) FROM users"
+            cursor.execute(query)
+            result = cursor.fetchone()
+            total_users = result[0]
+            speech_rate = 0.4
+            assign_rate = 0.7
+            total_courses = 19
+            return flask.render_template("index_admin.html", firstname=fname, total_courses=total_courses,
+                                         speech_rate=speech_rate, total_users=total_users, assign_rate=assign_rate)
+        elif result[0] == 1:  # Student
+            return "You are student."
+        elif result[0] == 2:  # Instructor
+            return "You are instructor."
+        else:
+            return "Error"
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -50,6 +71,19 @@ def login():
             print("cookie set")
             return resp
 
+
+@app.route('/results', methods=["GET"])
+def search_results():
+    keyword = request.args["keyword"]
+    return flask.render_template("search_results.html", keyword=keyword)
+
+
+@app.route('/logout')
+def logout():
+    resp = make_response(flask.redirect(flask.url_for('login')))
+    resp.delete_cookie('userid')
+    session.clear()
+    return resp
 
 
 if __name__ == '__main__':
