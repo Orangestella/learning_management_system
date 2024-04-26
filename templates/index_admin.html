@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='stylesheets/index.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/dashboard.css') }}">
     <title>Homepage for Admin</title>
 </head>
 <body>
@@ -14,21 +14,23 @@
     </form>
     <div class="user_info">Welcome {{ firstname }}!<br>Your role: Admin<br><a href="/logout" id="logout">Log out</a></div>
 </header>
-<p>Home</p>
-<div>
+<p id="path">Home</p>
+<div id="navigation_bar">
     <b>Navigation</b>
     <ul>
-        <li><a>Account Console</a></li>
-        <li><a>Course Console</a></li>
-        <li><a>Assignment Console</a></li>
-        <li><a>Lecture Console</a></li>
-        <li><a>Forum Console</a></li>
+        <li><a href="/account">Account Console</a></li>
+        <li><a href="/course">Course Console</a></li>
+        <li><a href="/assignment">Assignment Console</a></li>
+        <li><a href="/lecture">Lecture Console</a></li>
+        <li><a href="/forum">Forum Console</a></li>
     </ul>
 </div>
-<b>Administrator Dashboard</b>
-<div>Total registered users<br><b>{{ total_users }}</b></div>
-<div>Forum speech rate<br><b>{{ speech_rate }}</b></div>
-<div>Assignment completion rate<br><b>{{ assign_rate }}</b></div>
-<div>Total courses<br><b>{{ total_courses }}</b></div>
+<div id="dashboard">
+    <b>Administrator Dashboard</b>
+    <div>Total registered users<br><b>{{ total_users }}</b></div>
+    <div>Forum speech rate<br><b>{{ speech_rate }}</b></div>
+    <div>Assignment completion rate<br><b>{{ assign_rate }}</b></div>
+    <div>Total courses<br><b>{{ total_courses }}</b></div>
+</div>
 </body>
 </html>

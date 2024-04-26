@@ -1,0 +1,105 @@
+/* 全局样式 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e7eff6; /* 轻淡的蓝色背景 */
+    color: #333; /* 深色文本 */
+    margin: 0;
+    padding: 0;
+}
+
+/* 导航栏样式 */
+#navigation_bar {
+    background-color: #004080; /* 深蓝色背景 */
+    color: #ffffff; /* 白色文本 */
+    width: 200px; /* 导航栏宽度 */
+    height: 26vh; /* 全屏高度 */
+    position: fixed; /* 固定位置 */
+    left: 0; /* 左侧对齐 */
+    top: 200px; /* 顶部对齐 */
+    padding: 20px; /* 内边距 */
+}
+
+#navigation_bar b {
+    display: block;
+    margin-bottom: 10px;
+}
+
+#navigation_bar ul {
+    list-style-type: none; /* 移除列表标记 */
+    padding: 0;
+    margin: 0;
+}
+
+#navigation_bar li a {
+    color: #ffffff; /* 白色链接文本 */
+    text-decoration: none; /* 移除下划线 */
+    display: block;
+    padding: 10px 0; /* 上下填充 */
+}
+
+#navigation_bar li a:hover {
+    background-color: #0066cc; /* 鼠标悬停颜色 */
+}
+
+/* 仪表板样式 */
+#dashboard {
+    margin-left: 220px; /* 留出导航栏空间 */
+    padding: 176px;
+    width: calc(100% - 240px); /* 计算宽度 */
+    box-sizing: border-box; /* 边框盒模型 */
+    display: flex;
+    align-items: center; /* 垂直居中 */
+    min-height: 100vh; /* 最小高度 */
+    flex-direction: column; /* 垂直排列元素 */
+}
+
+#dashboard > div {
+    background-color: #cce0ff; /* 浅蓝色背景 */
+    border: 1px solid #004080; /* 深蓝色边框 */
+    padding: 10px;
+    margin: 10px 0; /* 上下外边距 */
+    width: 100%;
+    box-sizing: border-box; /* 边框盒模型 */
+    text-align: center; /* 文本居中 */
+}
+
+#dashboard b {
+    color: #004080; /* 深蓝色文本 */
+    font-size: 1.2em; /* 字体大小 */
+}
+
+header{
+    background-color: #0000A0;
+    color: white;
+    height: 0;
+    width: 100%;
+    font-size: 240%;
+    text-align: left;
+    padding-left: 3%;
+    padding-top: 2%;
+    padding-bottom: 6%;
+    position: fixed;
+}
+
+.top_search{
+    display: block;
+    padding-left: 65%;
+    margin:-57px 50px 75px 100px;
+}
+
+.user_info{
+    color: white;
+    font-size: 40%;
+    text-align: right;
+    padding-right: 3%;
+    margin:-112px 50px 75px 100px;
+}
+
+#logout{
+    color: lightgray;
+}
+
+#path{
+    padding-top: 150px;
+    position: fixed;
+}
