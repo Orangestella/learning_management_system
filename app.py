@@ -65,6 +65,7 @@ def login():
             return flask.jsonify({'status': 'error', 'message': 'Incorrect information, please try again after check.'})
         else:
             session['userid'] = id
+            session['name'] = fname
             resp = flask.make_response(flask.jsonify({'status': 'success', 'message': 'Welcome!'}))
             print(values)
             resp.set_cookie('userid', str(id), max_age=36000)
@@ -84,6 +85,28 @@ def logout():
     resp.delete_cookie('userid')
     session.clear()
     return resp
+
+
+@app.route('/account', methods=['GET'])
+def account():
+    if 'userid' not in session:
+        return flask.redirect("/login")
+    search_key = request.args.get('account_keyword')
+    if search_key is None or search_key == '':
+        query = "SELECT id, firstname, lastname, role_id FROM learn_manage.users"
+        value = ()
+    elif search_key.isnumeric():
+        search_key = int(search_key)
+        query = "SELECT id, firstname, lastname, role_id FROM learn_manage.users WHERE id=%s"
+        value = (search_key,)
+    else:
+        query = ("SELECT id, firstname, lastname, role_id FROM learn_manage.users WHERE firstname LIKE %s or lastname "
+                 "LIKE %s")
+        value = (f'%{search_key}%', f'%{search_key}%')
+    cursor.execute(query, value)
+    results = cursor.fetchall()
+    print(results)
+    return flask.render_template("account_console.html", accounts=results, firstname=session['name'])
 
 
 if __name__ == '__main__':
