@@ -89,6 +89,7 @@ def logout():
 
 @app.route('/account', methods=['GET'])
 def account():
+    role_dict = {0: 'Admin', 1: 'Student', 2: 'Instructor'}
     if 'userid' not in session:
         return flask.redirect("/login")
     search_key = request.args.get('account_keyword')
@@ -99,12 +100,23 @@ def account():
         search_key = int(search_key)
         query = "SELECT id, firstname, lastname, role_id FROM learn_manage.users WHERE id=%s"
         value = (search_key,)
+    elif search_key.lower() in ("admin", "student", "instructor"):
+        query = "SELECT id, firstname, lastname, role_id FROM learn_manage.users WHERE role_id=%s"
+        if search_key.lower() == "admin":
+            role_id = 0
+        elif search_key.lower() == "student":
+            role_id = 1
+        else:
+            role_id = 2
+        value = (role_id, )
     else:
         query = ("SELECT id, firstname, lastname, role_id FROM learn_manage.users WHERE firstname LIKE %s or lastname "
                  "LIKE %s")
         value = (f'%{search_key}%', f'%{search_key}%')
     cursor.execute(query, value)
     results = cursor.fetchall()
+    print(results)
+    results = [(id, firstname, lastname, role_dict[role_id]) for id, firstname, lastname, role_id in results]
     print(results)
     return flask.render_template("account_console.html", accounts=results, firstname=session['name'])
 
