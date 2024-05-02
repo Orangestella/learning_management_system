@@ -1,5 +1,5 @@
 import flask
-from flask import Flask, session, request, make_response
+from flask import Flask, session, request, make_response, jsonify
 import utils
 import mysql.connector
 import configparser
@@ -66,6 +66,8 @@ def login():
         else:
             session['userid'] = id
             session['name'] = fname
+            session['role_id'] = result[4]
+            print(session["role_id"])
             resp = flask.make_response(flask.jsonify({'status': 'success', 'message': 'Welcome!'}))
             print(values)
             resp.set_cookie('userid', str(id), max_age=36000)
@@ -90,7 +92,7 @@ def logout():
 @app.route('/account', methods=['GET'])
 def account():
     role_dict = {0: 'Admin', 1: 'Student', 2: 'Instructor'}
-    if 'userid' not in session:
+    if 'userid' not in session or session["role_id"] != 0:
         return flask.redirect("/login")
     search_key = request.args.get('account_keyword')
     if search_key is None or search_key == '':
@@ -108,7 +110,7 @@ def account():
             role_id = 1
         else:
             role_id = 2
-        value = (role_id, )
+        value = (role_id,)
     else:
         query = ("SELECT id, firstname, lastname, role_id FROM learn_manage.users WHERE firstname LIKE %s or lastname "
                  "LIKE %s")
@@ -119,6 +121,29 @@ def account():
     results = [(id, firstname, lastname, role_dict[role_id]) for id, firstname, lastname, role_id in results]
     print(results)
     return flask.render_template("account_console.html", accounts=results, firstname=session['name'])
+
+
+@app.route('/account/create_account', methods=['GET', 'POST'])
+def create_account():
+    if flask.request.method == 'GET':
+        return flask.render_template("create_account.html")
+    else:
+        try:
+            f_name = flask.request.form["c_firstname"]
+            l_name = flask.request.form["c_lastname"]
+            psw = utils.md5(flask.request.form["c_psw"]).upper()
+            role_id = int(flask.request.form["c_roles"])
+            query = "INSERT INTO learn_manage.users (firstname, lastname, password, role_id) VALUES (%s, %s, %s, %s)"
+            value = (f_name, l_name, psw, role_id)
+            cursor.execute(query, value)
+            cnx.commit()
+            if cursor.rowcount > 0:
+                return jsonify({'status': 'success', 'message': 'Create new account successfully.'})
+            else:
+                return jsonify({'status': 'error', 'message': 'Fail to create, please try again.'})
+        except Exception as e:
+            cnx.rollback()
+            return jsonify({'status': 'error', 'message': f'{e} occurred, please try again.'})
 
 
 if __name__ == '__main__':

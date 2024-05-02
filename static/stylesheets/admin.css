@@ -156,4 +156,26 @@ a:hover {
   text-decoration: underline;
 }
 
+.admin_form {
+    display: flex;
+    flex-direction: column;
+    padding-top: 90px;
+    width: 336px;
+    padding-left: 97px;
+}
+
+.admin_form form {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin_form label {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.admin_form input, .admin_form select {
+    margin-bottom: 10px;
+}
+
 
