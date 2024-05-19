@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/admin.css') }}">
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js" async="async"></script>
+    <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
+    <title>Course console</title>
+</head>
+<body>
+<div class="admin_form" id="admin_crs">
+    <b>{{ title }}</b>
+    <form name="admin_editor" id="erl_editor" method="post">
+        <label for="crs_id">Course ID*</label><input type="text" id="crs_id" name="crs_id" value="{{ crs_id }}" readonly>
+        <label for="std_ids">Students' IDs*</label><input type="text" id="std_ids" name="std_ids" value="{{ ids }}" required>
+        <input name="erl_submit" id="erl_submit" type="submit" value="Submit">
+    </form>
+</div>
+</body>
+</html>

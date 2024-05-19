@@ -1,0 +1,50 @@
+{% extends "adminbase.html" %}
+{% block js %}
+    <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
+{% endblock %}
+{% block title %}
+	Homepage for Admin
+{% endblock %}
+{% block content %}
+<p><a href="/">Home</a> &gt; {{ type }}</p>
+<div class="info_table_div">
+    <div class="table_head">
+        <b>{{ type.title() }} console</b>
+        <form class="table_search" name="items_search" id="items_search" method="get">
+            <input type="text" name="items_keyword" id="items_keyword">
+            <input type="submit" name="search_items" id="search_items" value="Search">
+        </form>
+        <button name="create_item" id="create_item" type="button" onclick="window.open('/{{ type }}/create', '_blank', 'height=500,width=500');">Create</button>
+    </div>
+    <table class="info_table" id="account_table" name="account_table">
+        <thead>
+        <tr>
+            {% if type == "account" %}
+                <th>ID</th>
+                <th>Firstname</th>
+                <th>Lastname</th>
+                <th>Role</th>
+                <th>Operation</th>
+            {% elif type == "course" %}
+                <th>ID</th>
+                <th>Name</th>
+                <th>Leader Instructor Name</th>
+                <th>Leader Instructor ID</th>
+                <th>Session</th>
+                <th>Operation</th>
+            {% endif %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in items %}
+        <tr>
+            {% for field in item %}
+            <td>{{ field }}</td>
+            {% endfor %}
+            <td><a href="/{{ type }}/delete?id={{ item[0] }}" class="delete_link">Delete</a>&nbsp;<a onclick="window.open('/{{ type }}/edit?id={{ item[0] }}', '_blank', 'height=500,width=500');">Edit</a>{% if type == "course" %}&nbsp;<a onclick="window.open('/course/enroll?id={{ item[0] }}', '_blank', 'height=500,width=500');">Enroll</a>{% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

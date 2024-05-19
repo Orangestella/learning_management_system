@@ -1,30 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/admin.css') }}">
-    <title>Homepage for Admin</title>
-</head>
-<body>
-<header>
-    Learning Management System
-    <form method="get" name="search_box" class="top_search" action="/results">
-        <input type="text" name="keyword" id="keyword">
-        <input type="submit" name="search" id="search" value="Search">
-    </form>
-    <div class="user_info">Welcome {{ firstname }}!<br>Your role: Admin<br><a href="/logout" id="logout">Log out</a></div>
-</header>
-<p id="path">Home</p>
-<div id="navigation_bar">
-    <b>Navigation</b>
-    <ul>
-        <li><a href="/account">Account Console</a></li>
-        <li><a href="/course">Course Console</a></li>
-        <li><a href="/assignment">Assignment Console</a></li>
-        <li><a href="/lecture">Lecture Console</a></li>
-        <li><a href="/forum">Forum Console</a></li>
-    </ul>
-</div>
+{% extends "adminbase.html" %}
+{% block js %}
+    <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
+{% endblock %}
+{% block title %}
+	Homepage for Admin
+{% endblock %}
+{% block content %}
 <div id="dashboard">
     <b>Administrator Dashboard</b>
     <div>Total registered users<br><b>{{ total_users }}</b></div>
@@ -32,5 +13,4 @@
     <div>Assignment completion rate<br><b>{{ assign_rate }}</b></div>
     <div>Total courses<br><b>{{ total_courses }}</b></div>
 </div>
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block body %}
+    <div id="navigation_bar">
+        <b>Navigation</b>
+        <ul>
+            <li><a href="/account">Account Console</a></li>
+            <li><a href="/course">Course Console</a></li>
+            <li><a href="/assignment">Assignment Console</a></li>
+            <li><a href="/lecture">Lecture Console</a></li>
+            <li><a href="/forum">Forum Console</a></li>
+        </ul>
+    </div>
+    {% block content %}{% endblock %}
+{% endblock %} 

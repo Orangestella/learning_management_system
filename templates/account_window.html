@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/admin.css') }}">
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js" async="async"></script>
+    <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
+    <title>Account console</title>
+</head>
+<body>
+<div class="admin_form">
+    <b>{{ title }}</b>
+    <form name="admin_editor" method="post">
+        {% if edit %}
+        <label for="e_id">ID*</label><input name="e_id" id="e_id" type="text" value="{{ id }}" readonly>
+        {% endif %}
+        <label for="c_firstname">Firstname*</label><input name="c_firstname" id="c_firstname" type="text" value="{{ f_name }}" required>
+        <label for="c_lastname">Lastname*</label><input name="c_lastname" id="c_lastname" type="text" value="{{ l_name }}" required>
+        <label for="c_psw">Password*</label><input name="c_psw" id="c_psw" type="password" {% if not edit %}required{% endif %}>
+        {% if edit %}
+        <label for="e_psw">Confirm password*</label><input name="e_psw" id="e_psw" type="password" required>
+        {% endif %}
+        <label for="c_roles">Roles*</label><select name="c_roles" id="c_roles" required>
+            <option value="0">Admin</option>
+            <option value="1">Student</option>
+            <option value="2">Instructor</option>
+        </select>
+        <input name="c_submit" id="account_submit" type="submit" value="Submit">
+    </form>
+</div>
+</body>
+</html>

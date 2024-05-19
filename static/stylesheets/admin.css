@@ -119,12 +119,12 @@ header{
 }
 
 
-.table_search, #create_account {
+.table_search, #create_item {
   display: inline-block; /* 并排显示 */
   margin-right: 10px;
 }
 
-#account_keyword, #search_account {
+#items_keyword, #search_items {
   font-size: 14px; /* 搜索框和搜索按钮字体大小 */
 }
 
