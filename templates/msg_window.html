@@ -6,15 +6,15 @@
     <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js" async="async"></script>
     <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
-    <title>Course console</title>
+    <title>New message</title>
 </head>
 <body>
-<div class="admin_form" id="admin_erl">
+<div class="admin_form" id="msg_form">
     <b>{{ title }}</b>
-    <form name="admin_editor" id="erl_editor" method="post">
-        <label for="crs_id">Course ID*</label><input type="text" id="crs_id" name="crs_id" value="{{ crs_id }}" readonly>
-        <label for="std_ids">Students' IDs*</label><input type="text" id="std_ids" name="std_ids" value="{{ ids }}" required>
-        <input name="erl_submit" id="erl_submit" type="submit" value="Submit">
+    <form name="admin_editor" id="msg_editor" method="post">
+        <label for="receiver_id">Receiver ID*</label><input type="number" id="receiver_id" name="receiver_id" required>
+        <label for="con">Contents*</label><input type="text" id="con" name="con" style="height:10rem"  required>
+        <input name="msg_submit" id="msg_submit" type="submit" value="Send">
     </form>
 </div>
 </body>

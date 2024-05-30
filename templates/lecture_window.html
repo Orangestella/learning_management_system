@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/admin.css') }}">
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="{{ url_for('static',filename='js/admin_lecture.js') }}"></script>
+    <title>Lecture console</title>
+</head>
+<body>
+<div class="admin_form" id="admin_lec">
+    <b>{{ title }}</b>
+    <form enctype="multipart/form-data" name="admin_editor" id="lec_editor" method="post" action="/lecture/create">
+        {% if edit %}
+        <label for="l_id">ID*</label><input name="l_id" id="l_id" type="text" value="{{ l_id }}" readonly>
+        {% endif %}
+        <label for="lec_title">Lecture Title*</label><input type="text" id="lec_title" name="lec_title" value="{{ lec_title }}" required>
+        <label for="crs_id">Course ID*</label><input type="number" id="crs_id" name="crs_id" value="{{ crs_id }}" required>
+        <label for="rse">Resource*</label><input type="file" id="rse" name="rse" accept=".pdf, .doc, .docx" content="test" {% if not edit %}required{% endif %}>
+        <label for="desc_lec">Description</label><input type="text" id="desc_lec" name="desc_lec" value="{{ desc_lec }}">
+        <input name="lec_submit" id="lec_submit" type="submit" value="Submit">
+    </form>
+</div>
+</body>
+</html>

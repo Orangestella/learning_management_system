@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block role %}
+    Student
+{% endblock %}
+{% block body %}
+    <div id="navigation_bar">
+        <b>Courses</b>
+        <ul>
+            {% for course in courses %}
+            <li><a href="/course/{{ course[4] }}">{{ course[0] }} {{ course[1] }}</a></li>
+            {% endfor %}
+        </ul>
+        <b>Grades</b>
+        <ul>
+            {% for grade in grades %}
+            <li><a href="/grade/{{ grade[0] }}">{{ grade[0] }} {{ grade[1] }}</a></li>
+            {% endfor %}
+        </ul>
+        <b>Assignment</b>
+        <ul>
+            {% for assignment in assignments %}
+            <li><a href="/assignment/{{ assignment[0] }}">{{ assignment[0] }} {{ assignment[1] }}</a></li>
+            {% endfor %}
+        </ul>
+        <b>Discussion Forums</b>
+            <ul>
+                {% for forum in forums %}
+                <li><a href="/forum/view/{{ forum[1] }}">{{ forum[0] }}</a></li>
+                {% endfor %}
+            </ul>
+    </div>
+    {% block content %}{% endblock %}
+{% endblock %}

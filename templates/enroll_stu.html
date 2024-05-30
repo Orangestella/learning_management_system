@@ -9,12 +9,12 @@
     <title>Course console</title>
 </head>
 <body>
-<div class="admin_form" id="admin_erl">
+<div class="admin_form" id="stu_frm">
     <b>{{ title }}</b>
     <form name="admin_editor" id="erl_editor" method="post">
-        <label for="crs_id">Course ID*</label><input type="text" id="crs_id" name="crs_id" value="{{ crs_id }}" readonly>
-        <label for="std_ids">Students' IDs*</label><input type="text" id="std_ids" name="std_ids" value="{{ ids }}" required>
-        <input name="erl_submit" id="erl_submit" type="submit" value="Submit">
+        <label for="crs_id">Course ID*</label><input type="text" id="crs_id" name="crs_id" required>
+
+        <input name="erl_submit" id="elr_submit" type="submit" value="Submit">
     </form>
 </div>
 </body>

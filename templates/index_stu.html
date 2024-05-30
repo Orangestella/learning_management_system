@@ -1,0 +1,21 @@
+{% extends "student_base.html" %}
+{% block title %}
+	Homepage for Student
+{% endblock %}
+{% block content %}
+    <button onclick="window.location.href='/messages'" type="button" style="position: relative; top: 10rem; left: 70rem;">Messages</button>
+    <button onclick="window.location.href='/enroll'" type="button" style="position: relative; top: 10rem; left: 70rem;">Enroll</button>
+    <button onclick="window.location.href='/forum/stu'" type="button" style="position: relative; top: 10rem; left: 70rem;">Join Forum</button>
+    <button onclick="window.location.href='/notification'" type="button" style="position: relative; top: 10rem; left: 70rem;">Notifications</button>
+<div id="dashboard">
+    <h2>Courses List</h2>
+    {% for course in courses %}
+        <div>
+            <b>{{ course[0] }} ({{ course[1] }})</b><br>
+            Leader instructor: {{ course[2] }}<br>
+            <p>{{ course[3] }}</p>
+            <a href="/course/{{ course[4] }}">View details</a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

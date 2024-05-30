@@ -1,0 +1,26 @@
+{% extends "student_base.html" %}
+{% block title %}
+	Homepage for Student
+{% endblock %}
+{% block content %}
+
+<div id="dashboard" style="display: flex; flex-direction: column; align-items: center;">
+    <h2>{{ frm[1] }}</h2>
+    <div style="display: flex; justify-content: space-around; width: 100%; background: none; border: none">
+        <button onclick="window.location.href='/forum/stu/leave?id={{ frm[0] }}'" type="button" style="margin: 10px; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Leave</button>
+        <button onclick="window.open('/forum/stu/post?id={{ frm[0] }}', '_blank', 'height=500,width=500');" type="button" style="margin: 10px; padding: 10px; background-color: #008CBA; color: white; border: none; border-radius: 4px; cursor: pointer;">Post</button>
+    </div>
+    {% if posts != [] %}
+    {% for post in posts %}
+        <div>
+            {{ post[0] }} post at {{ post[3] }} <br><br>
+            <b>{{ post[2] }}</b> <br><br>
+            <a href="/forum/poster/detail?id={{ post[4] }}" style="color: #008CBA;">View Details</a>
+        </div>
+    {% endfor %}
+    {% else %}
+    There are no post.
+{% endif %}
+</div>
+
+{% endblock %}

@@ -1,58 +1,43 @@
-{% extends "adminbase.html" %}
+{% extends "student_base.html" %}
 {% block js %}
     <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
 {% endblock %}
 {% block title %}
-	Console for Admin
+{{ type.title()}}
 {% endblock %}
 {% block content %}
 <p><a href="/">Home</a> &gt; {{ type }}</p>
 <div class="info_table_div">
     <div class="table_head">
-        <b>{{ type.title() }} console</b>
+        <b>{{ type.title() }}</b>
         <form class="table_search" name="items_search" id="items_search" method="get">
             <input type="text" name="items_keyword" id="items_keyword">
             <input type="submit" name="search_items" id="search_items" value="Search">
         </form>
-        {% if type != "enrollment requests" %}<button name="create_item" id="create_item" type="button" onclick="window.open('/{{ type }}/create', '_blank', 'height=500,width=500');">Create</button>{% endif %}
-        {% if type == 'course' %}<button name="accept_enroll" id="accept_enroll" type="button" onclick="window.location.href='/course/enroll/request'">View Requests</button> {% endif %}
+    {% if type != 'enroll' %}
+        <button name="create_item" id="create_item" type="button" onclick="window.open('/{{ type }}/create', '_blank', 'height=500,width=500');">Create</button>
+    {% endif %}
+        {% if type == 'course' %}<button name="accept_enroll" id="accept_enroll" type="button" onclick="window.location.href='http://www.baidu.com'">View Requests</button> {% endif %}
     </div>
     <table class="info_table" id="account_table" name="account_table">
         <thead>
         <tr>
             <th>ID</th>
-            {% if type == "account" %}
-                <th>Firstname</th>
-                <th>Lastname</th>
-                <th>Role</th>
-            {% elif type == "course" %}
-                <th>Name</th>
-                <th>Leader Instructor Name</th>
-                <th>Leader Instructor ID</th>
-                <th>Session</th>
-            {% elif type == "assignment" %}
-                <th>Name</th>
-                <th>Course Name</th>
-                <th>Deadline</th>
-            {% elif type == "lecture" %}
-                <th>Name</th>
-                <th>Course Name</th>
-                <th>Resources</th>
-            {% elif type == "forum" %}
-                <th>Name</th>
-            {% elif type == "membership" %}
-                <th>Firstname</th>
-                <th>Lastname</th>
-                <th>Student ID</th>
-            {% elif type == "messages" %}
+            {% if type == "messages" %}
                 <th>Sender</th>
                 <th>Content</th>
                 <th>Send Time</th>
-            {% elif type == "enrollment requests" %}
-                <th>Student Name</th>
-                <th>Student ID</th>
+            {% elif type == "lecture" %}
+                <th>Name</th>
+                <th>Resources</th>
+                <th>Description</th>
+                <th>Upload Datetime</th>
+            {% elif type == "enroll" %}
                 <th>Course Name</th>
                 <th>Session</th>
+                <th>Leader Instructor</th>
+            {% elif type == "join forum" %}
+                <th>Name</th>
             {% endif %}
             <th>Operation</th>
         </tr>
@@ -68,10 +53,12 @@
             <td>{{ field }}</td>
             {% endif %}
             {% endfor %}
-        {% if type != "enrollment requests" %}
+        {% if type != 'enroll' and type != 'join forum' %}
             <td><a href="/{{ type }}/delete?id={{ item[0] }}" class="delete_link">Delete</a>{% if type != 'membership' %}&nbsp;{% if type != 'messages' %}<a onclick="window.open('/{{ type }}/edit?id={{ item[0] }}', '_blank', 'height=500,width=500');">Edit</a>{% endif %}{% if type == "course" %}&nbsp;<a onclick="window.open('/course/enroll?id={{ item[0] }}', '_blank', 'height=500,width=500');">Enroll</a>{% elif type == "forum" %}&nbsp;<a href="/forum/membership/{{ item[0] }}">View</a>{% endif %}{% endif %}</td>
-            {% else %}
-            <td><a href="/course/enroll/receive?id={{ item[0] }}">Receive</a>&nbsp;<a href="/course/enroll/deny?id={{ item[0] }}">Deny</a></td>
+        {% elif type != 'join forum' %}
+            <td><a href="/enroll/request/send?id={{ item[0] }}">Enroll</a></td>
+        {% else %}
+            <td><a href="/forum/stu/join?id={{ item[0] }}">Join</a></td>
         {% endif %}
         </tr>
         {% endfor %}

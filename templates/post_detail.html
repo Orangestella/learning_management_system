@@ -1,0 +1,27 @@
+{% extends "student_base.html" %}
+{% block title %}
+	Homepage for Student
+{% endblock %}
+{% block content %}
+
+<div id="dashboard" style="display: flex; flex-direction: column; align-items: center;">
+    <h2>Post Detail</h2>
+    <div>{{ post[0] }} {{ post[2] }} <br> <b>{{ post[1] }}</b></div>
+<hr>
+    <div>
+        <form method="post" name="cmt" id="cmt">
+            Comment
+            <label for="cmt">Contents*</label><input type="text" id="cmt" name="cmt" style="height:5rem; width: 20rem" required><br>
+            <label for="pst_id">Post ID</label><input type="number" id="pst_id" name="pst_id" value={{ post[3] }} readonly>
+            <input name="cmt_submit" id="cmt_submit" type="submit" value="Send">
+        </form>
+    </div>
+    {% for cmt in cmts %}
+        <div>
+            {{ cmt[0] }} {{ cmt[2] }}<br><br>
+            {{ cmt[1] }}
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
