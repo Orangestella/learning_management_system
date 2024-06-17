@@ -1,0 +1,50 @@
+{% extends "student_base.html" %}
+{% block title %}
+{{ items[0] }}
+{% endblock %}
+{% block content %}
+    <p style="position: fixed; top: 8rem"><a href="/">Home</a> &gt; Score of {{ items[0] }}</p>
+    <div id="grade">
+    <h3>Grade and Feedback of {{ items[0] }}</h3>
+    <p>
+        <b>Score</b>: <i>{{ items[1] }}</i>
+    </p>
+    <p>
+        <b>Feedback</b>:<br>
+        {{ items[2] }}
+    </p>
+    </div>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    #grade {
+        width: 35rem;
+        margin: 0 auto;
+        background-color: #f2f2f2;
+        padding: 2rem;
+        border-radius: 0.8rem;
+        box-shadow: 0rem 0rem 1rem 0rem rgba(0,0,0,0.15);
+        position: relative;
+        top: 16rem;
+    }
+
+    h3, p {
+        color: #333;
+    }
+
+    p {
+        margin-top: 1rem;
+    }
+
+    b {
+        font-size: 1.2rem;
+    }
+
+    i {
+        color: #4CAF50;
+    }
+</style>
+
+{% endblock %}

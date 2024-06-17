@@ -6,7 +6,7 @@
 	Console for Admin
 {% endblock %}
 {% block content %}
-<p><a href="/">Home</a> &gt; {{ type }}</p>
+<p style="position: fixed; top: 8rem"><a href="/">Home</a> &gt; {{ type }}</p>
 <div class="info_table_div">
     <div class="table_head">
         <b>{{ type.title() }} console</b>
@@ -69,7 +69,7 @@
             {% endif %}
             {% endfor %}
         {% if type != "enrollment requests" %}
-            <td><a href="/{{ type }}/delete?id={{ item[0] }}" class="delete_link">Delete</a>{% if type != 'membership' %}&nbsp;{% if type != 'messages' %}<a onclick="window.open('/{{ type }}/edit?id={{ item[0] }}', '_blank', 'height=500,width=500');">Edit</a>{% endif %}{% if type == "course" %}&nbsp;<a onclick="window.open('/course/enroll?id={{ item[0] }}', '_blank', 'height=500,width=500');">Enroll</a>{% elif type == "forum" %}&nbsp;<a href="/forum/membership/{{ item[0] }}">View</a>{% endif %}{% endif %}</td>
+            <td><a href="/{{ type }}/delete?id={{ item[0] }}" class="delete_link">Delete</a>{% if type != 'membership' %}&nbsp;{% if type != 'messages' %}<a onclick="window.open('/{{ type }}/edit?id={{ item[0] }}', '_blank', 'height=500,width=500');">Edit</a>{% endif %}{% if type == "course" %}&nbsp;{% elif type == "forum" %}&nbsp;<a href="/forum/membership/{{ item[0] }}">View</a>{% endif %}{% endif %}</td>
             {% else %}
             <td><a href="/course/enroll/receive?id={{ item[0] }}">Receive</a>&nbsp;<a href="/course/enroll/deny?id={{ item[0] }}">Deny</a></td>
         {% endif %}

@@ -3,6 +3,10 @@
     Student
 {% endblock %}
 {% block body %}
+     <button onclick="window.location.href='/messages'" type="button" style="position: fixed; top: 6rem; right: 3rem; ">Messages</button>
+    <button onclick="window.location.href='/enroll'" type="button" style="position: fixed; top: 6rem; right: 9rem; ">Enroll</button>
+    <button onclick="window.location.href='/forum/stu'" type="button" style="position: fixed; top: 6rem; right: 13rem; ">Join Forum</button>
+    <button onclick="window.location.href='/notification'" type="button" style="position: fixed; top: 6rem; right: 23em; ">Notifications</button>
     <div id="navigation_bar">
         <b>Courses</b>
         <ul>
@@ -13,13 +17,13 @@
         <b>Grades</b>
         <ul>
             {% for grade in grades %}
-            <li><a href="/grade/{{ grade[0] }}">{{ grade[0] }} {{ grade[1] }}</a></li>
+            <li><a href="/grade/{{ grade[2] }}">{{ grade[0] }} {{ grade[1] }}</a></li>
             {% endfor %}
         </ul>
         <b>Assignment</b>
         <ul>
             {% for assignment in assignments %}
-            <li><a href="/assignment/{{ assignment[0] }}">{{ assignment[0] }} {{ assignment[1] }}</a></li>
+            <li><a href="/assignment/{{ assignment[2] }}">{{ assignment[0] }} {{ assignment[1] }}</a></li>
             {% endfor %}
         </ul>
         <b>Discussion Forums</b>

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block role %}
+    Instructor
+{% endblock %}
+{% block body %}
+    <button onclick="window.location.href='/messages'" type="button" style="position: fixed; top: 6rem; right: 3rem; ">Messages</button>
+    <button onclick="window.location.href='/notification'" type="button" style="position: fixed; top: 6rem; right: 10em; ">Notifications</button>
+    <div id="navigation_bar">
+        <b>Courses</b>
+        <ul>
+            {% for course in courses %}
+            <li><a href="/course/{{ course[2] }}">{{ course[0] }} {{ course[1] }} ({{ course[2] }})</a></li>
+            {% endfor %}
+        </ul>
+        <b>Students</b>
+        <ul>
+            {% for course in courses %}
+            <li><a href="/student/{{ course[2] }}">Students of {{ course[0] }} {{ course[1] }}</a></li>
+            {% endfor %}
+        </ul>
+        <b>Assignment</b>
+        <ul>
+            <li><a onclick="window.open('/assignment/create', '_blank', 'height=500,width=500');">Create Assignment</a></li>
+            {% for assignment in assignments %}
+            <li><a href="/assignment/{{ assignment[2] }}">{{ assignment[0] }} {{ assignment[1] }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% block content %}{% endblock %}
+{% endblock %}

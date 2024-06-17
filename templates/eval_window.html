@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/admin.css') }}">
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="{{ url_for('static',filename='js/admin_lecture.js') }}"></script>
+    <title>Evaluate submission</title>
+</head>
+<body>
+<div class="admin_form" id="admin_eval">
+    <b>{{ title }}</b>
+    <form name="admin_editor" id="eval_editor" method="post">
+        <label for="s_id">Submission ID*</label><input name="s_id" id="s_id" type="number" value="{{ s_id }}" readonly>
+        <label for="score">Score*</label><input type="number" id="score" name="score" value="{{ score }}" required>
+        <label for="fb">Feedback*</label><input type="text" id="fb" name="fb" value="{{ fb }}" required>
+        <input name="eval_submit" id="eval_submit" type="submit" value="Submit">
+    </form>
+</div>
+</body>
+</html>

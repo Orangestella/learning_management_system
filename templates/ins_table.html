@@ -1,0 +1,86 @@
+{% extends "ins_base.html" %}
+{% block js %}
+    <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
+{% endblock %}
+{% block title %}
+{{ type.title()}}
+{% endblock %}
+{% block content %}
+    <p style="position: fixed; top: 8rem"><a href="/">Home</a> &gt; {{ type }}</p>
+    <div class="info_table_div">
+        <div class="table_head">
+            <b>{{ type.title() }}</b>
+        <form class="table_search" name="items_search" id="items_search" method="get">
+            <input type="text" name="items_keyword" id="items_keyword">
+            <input type="submit" name="search_items" id="search_items" value="Search">
+        </form>
+            {% if edit %}<button name="create" id="create" type="button" onclick="window.open('/{{ type }}/create?id={{ crs_id }}', '_blank', 'height=500,width=500');">Create</button> {% endif %}
+        </div>
+    <table class="info_table" id="account_table" name="account_table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            {% if type == "lecture" %}
+                <th>Name</th>
+                {% if not edit %}
+                    <th>Course</th>
+                {% endif %}
+                <th>Resources</th>
+                <th>Description</th>
+                <th>Upload Datetime</th>
+                <th>Operation</th>
+            {% elif type == "student" %}
+                <th>Firstname</th>
+                <th>Lastname</th>
+            {% elif type == "submission" %}
+                <th>Student Name</th>
+                <th>Submission Date</th>
+                <th>Attach File</th>
+                <th>Operation</th>
+            {% elif type == "messages" %}
+                <th>Sender</th>
+                <th>Content</th>
+                <th>Send Time</th>
+                <th>Operation</th>
+            {% elif type == "notification" %}
+                <th>Title</th>
+                <th>Date</th>
+                <th>Operation</th>
+            {% endif %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in items %}
+        <tr>
+            {% for field in item %}
+            {% set bool = judge_str(field) %}
+            {% if bool and ('files' in field or 'http' in field)  %}
+            <td><a href="/{{ field }}" download>Click to download</a></td>
+            {% else %}
+            <td>{{ field }}</td>
+            {% endif %}
+            {% endfor %}
+        {% if type == "lecture" %}
+            <td>
+                <a href="/lecture/delete?id={{ item[0] }}" class="delete_link">Delete</a>&nbsp;
+                <a onclick="window.open('/lecture/edit?id={{ item[0] }}', '_blank', 'height=500,width=500');">Edit</a>
+            </td>
+        {% elif type == "submission" %}
+            <td>
+            <a onclick="window.open('/submission/eval?id={{ item[0] }}', '_blank', 'height=500,width=500');">Evaluate</a>
+            </td>
+        {% elif type == "messages" %}
+            <td><a href="/messages/delete?id={{ item[0] }}" class="delete_link">Delete</a></td>
+        {% elif type == "notification" %}
+            <td>
+            <a onclick="window.open('/notification/view?id={{ item[0] }}', '_blank', 'height=500,width=500');">View</a>
+            &nbsp;<a href="/notification/delete?id={{ item[0] }}" class="delete_link">Delete</a>
+            &nbsp;<a onclick="window.open('/notification/edit?id={{ item[0] }}', '_blank', 'height=500,width=500');">Edit</a>
+            </td>
+        {% endif %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+{% endblock %}

@@ -6,7 +6,7 @@
 {{ type.title()}}
 {% endblock %}
 {% block content %}
-<p><a href="/">Home</a> &gt; {{ type }}</p>
+<p style="position: fixed; top: 8rem"><a href="/">Home</a> &gt; {{ type }}</p>
 <div class="info_table_div">
     <div class="table_head">
         <b>{{ type.title() }}</b>
@@ -14,10 +14,6 @@
             <input type="text" name="items_keyword" id="items_keyword">
             <input type="submit" name="search_items" id="search_items" value="Search">
         </form>
-    {% if type != 'enroll' %}
-        <button name="create_item" id="create_item" type="button" onclick="window.open('/{{ type }}/create', '_blank', 'height=500,width=500');">Create</button>
-    {% endif %}
-        {% if type == 'course' %}<button name="accept_enroll" id="accept_enroll" type="button" onclick="window.location.href='http://www.baidu.com'">View Requests</button> {% endif %}
     </div>
     <table class="info_table" id="account_table" name="account_table">
         <thead>
@@ -38,6 +34,10 @@
                 <th>Leader Instructor</th>
             {% elif type == "join forum" %}
                 <th>Name</th>
+            {% elif type == "notification" %}
+                <th>Sender Name</th>
+                <th>Title</th>
+                <th>Date</th>
             {% endif %}
             <th>Operation</th>
         </tr>
@@ -53,7 +53,11 @@
             <td>{{ field }}</td>
             {% endif %}
             {% endfor %}
-        {% if type != 'enroll' and type != 'join forum' %}
+        {% if type == 'lecture' %}
+            <td><a href="https://www.bing.com">View</a></td>
+        {% elif type == 'notification' %}
+            <td><a onclick="window.open('/{{ type }}/view?id={{ item[0] }}', '_blank', 'height=500,width=500');">View</a></td>
+        {% elif type != 'enroll' and type != 'join forum' %}
             <td><a href="/{{ type }}/delete?id={{ item[0] }}" class="delete_link">Delete</a>{% if type != 'membership' %}&nbsp;{% if type != 'messages' %}<a onclick="window.open('/{{ type }}/edit?id={{ item[0] }}', '_blank', 'height=500,width=500');">Edit</a>{% endif %}{% if type == "course" %}&nbsp;<a onclick="window.open('/course/enroll?id={{ item[0] }}', '_blank', 'height=500,width=500');">Enroll</a>{% elif type == "forum" %}&nbsp;<a href="/forum/membership/{{ item[0] }}">View</a>{% endif %}{% endif %}</td>
         {% elif type != 'join forum' %}
             <td><a href="/enroll/request/send?id={{ item[0] }}">Enroll</a></td>

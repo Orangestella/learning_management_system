@@ -12,7 +12,8 @@ body {
     background-color: #004080; /* 深蓝色背景 */
     color: #ffffff; /* 白色文本 */
     width: 200px; /* 导航栏宽度 */
-    height: 26vh; /* 全屏高度 */
+    height: auto; /* 高度随子元素扩展 */
+    min-height: 40vh; /* 最小高度为视口的高度 */
     position: fixed; /* 固定位置 */
     left: 0; /* 左侧对齐 */
     top: 200px; /* 顶部对齐 */
@@ -93,6 +94,9 @@ header{
     text-align: right;
     padding-right: 3%;
     margin:-112px 50px 75px 100px;
+    position: fixed;
+    top: 9rem;
+    right: -3rem;
 }
 
 #logout{

@@ -29,8 +29,7 @@ def judge_str(filed):
 app.jinja_env.globals.update(judge_str=judge_str)
 
 
-def fill_bar(userid):
-    print("?")
+def fill_bar_stu(userid):
     query = ("SELECT c.name, c.session, CONCAT_WS(' ',u.firstname, u.lastname), c.description, c.id "
              "FROM learn_manage.courses AS c INNER JOIN learn_manage.enrollments AS e ON e.course_id=c.id "
              "INNER JOIN learn_manage.users AS u ON u.id=c.leader_id WHERE e.student_id=%s AND e.status=%s")
@@ -38,12 +37,12 @@ def fill_bar(userid):
     print("?")
     cursor.execute(query, value)
     results_crs = cursor.fetchall()
-    query = ("SELECT c.name, a.name FROM learn_manage.submissions AS s INNER JOIN learn_manage.assignments AS "
-             "a ON s.assignment_id=a.id INNER JOIN learn_manage.courses AS c ON a.course_id = c.id WHERE s.student_id=%s")
+    query = ("SELECT c.name, a.name, s.id FROM learn_manage.submissions AS s INNER JOIN learn_manage.assignments AS "
+             "a ON s.assignment_id=a.id INNER JOIN learn_manage.courses AS c ON a.course_id = c.id WHERE s.student_id=%s AND s.score IS NOT NULL")
     value = (userid,)
     cursor.execute(query, value)
     results_grd = cursor.fetchall()
-    query = ("SELECT a.name, a.deadline FROM learn_manage.assignments AS a INNER JOIN learn_manage.enrollments "
+    query = ("SELECT a.name, a.deadline, a.id FROM learn_manage.assignments AS a INNER JOIN learn_manage.enrollments "
              "AS e ON e.course_id=a.course_id WHERE e.student_id=%s AND e.status=%s")
     value = (userid, "received")
     cursor.execute(query, value)
@@ -56,7 +55,21 @@ def fill_bar(userid):
     return results_crs, results_grd, results_asn, results_frm
 
 
-@app.route('/')
+def fill_bar_ins(userid):
+    query = (
+        "SELECT c.name, c.session, c.id FROM learn_manage.courses AS c INNER JOIN learn_manage.ins_crs_assignments AS i "
+        "ON i.crs_id = c.id WHERE i.ins_id = %s;")
+    value = (userid,)
+    cursor.execute(query, value)
+    results_crs = cursor.fetchall()
+    query = ("SELECT a.name, a.deadline, i.crs_id FROM learn_manage.assignments AS a INNER JOIN "
+             "learn_manage.ins_crs_assignments AS i ON i.crs_id=a.course_id WHERE i.ins_id=%s")
+    cursor.execute(query, value)
+    results_asn = cursor.fetchall()
+    return results_crs, results_asn
+
+
+@app.route('/', methods=['GET'])
 def index():  # put application's code here
     if not flask.request.cookies.get("userid") and 'userid' not in session:
         print(flask.request.cookies.get("userid"))
@@ -81,19 +94,46 @@ def index():  # put application's code here
             cursor.execute(query2)
             result2 = cursor.fetchone()
             total_users = result1[0]
-            speech_rate = 0.4
-            assign_rate = 0.7
+            query3 = ("SELECT COUNT(fp.id) / COUNT(DISTINCT ufm.user_id) AS total_speech_rate FROM "
+                      "learn_manage.user_forum_memberships AS ufm LEFT JOIN learn_manage.forum_posts AS fp ON "
+                      "ufm.user_id = fp.poster_id AND ufm.forum_id = fp.forum_id")
+            cursor.execute(query3)
+            result3 = cursor.fetchone()
+            speech_rate = result3[0]
+            query4 = "SELECT COUNT(DISTINCT sub.id) / COUNT(asn.id) FROM learn_manage.assignments AS asn LEFT JOIN learn_manage.submissions AS sub ON sub.assignment_id=asn.id"
+            cursor.execute(query4)
+            result4 = cursor.fetchone()
+            assign_rate = result4[0]
             total_courses = result2[0]
             return flask.render_template("index_admin.html", firstname=fname, total_courses=total_courses,
                                          speech_rate=speech_rate, total_users=total_users, assign_rate=assign_rate)
         elif result1[0] == 1:  # Student
-            results = fill_bar(session['userid'])
+            results = fill_bar_stu(session['userid'])
             return flask.render_template("index_stu.html", firstname=fname, courses=results[0], grades=results[1],
                                          assignments=results[2], forums=results[3])
         elif result1[0] == 2:  # Instructor
-            return "You are instructor."
+            info = fill_bar_ins(session['userid'])
+            search_key = request.args.get('items_keyword')
+            if search_key == '' or search_key is None:
+                query = ("SELECT l.id, l.name, CONCAT_WS(' ', c.name, c.session), l.resource_url, l.description, "
+                         "l.upload_date FROM learn_manage.lectures AS l INNER JOIN learn_manage.courses AS c ON "
+                         "l.course_id = c.id INNER JOIN learn_manage.ins_crs_assignments AS i ON i.crs_id = c.id "
+                         "WHERE i.ins_id = %s")
+                value = (session['userid'],)
+                cursor.execute(query, value)
+                items = cursor.fetchall()
+            else:
+                query = ("SELECT l.id, l.name, CONCAT_WS(' ', c.name, c.session), l.resource_url, l.description, "
+                         "l.upload_date FROM learn_manage.lectures AS l INNER JOIN learn_manage.courses AS c ON "
+                         "l.course_id = c.id INNER JOIN learn_manage.ins_crs_assignments AS i ON i.crs_id = c.id "
+                         "WHERE i.ins_id = %s AND (l.name LIKE %s OR l.description LIKE %s)")
+                value = (session['userid'], f'%{search_key}%', f'%{search_key}%')
+                cursor.execute(query, value)
+                items = cursor.fetchall()
+            return flask.render_template("ins_table.html", firstname=fname, courses=info[0], assignments=info[1],
+                                         edit=False, type='lecture', items=items)
         else:
-            return "Error"
+            return flask.abort(404)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -123,10 +163,11 @@ def login():
             return resp
 
 
-@app.route('/results', methods=["GET"])
-def search_results():
-    keyword = request.args["keyword"]
-    return flask.render_template("search_results.html", keyword=keyword)
+# @app.route('/results', methods=["GET"])
+# def search_results():
+#     keyword = request.args["keyword"]
+#     query = "SELECT "
+#     return flask.render_template("search_results.html", keyword=keyword)
 
 
 @app.route('/logout')
@@ -445,81 +486,80 @@ def edit_course():
             return jsonify({'status': 'error', 'message': f'{e} occurred, please try again.'})
 
 
-@app.route('/course/enroll', methods=['GET', 'POST'])
-def enroll_course():
-    if 'userid' not in session or session["role_id"] != 0:
-        return jsonify({'status': 'unauthenticated', 'message': 'You do not have access to perform this operation'})
-
-    if flask.request.method == 'GET':
-        crs_id = flask.request.args['id']
-        query = "SELECT student_id, course_id, id FROM learn_manage.enrollments WHERE course_id=%s"
-        value = (crs_id,)
-        cursor.execute(query, value)
-        result = cursor.fetchall()
-        std_ids = ''
-        print(result)
-        if result is not None:
-            for erl in result:
-                std_ids = std_ids + str(erl[0]) + ' '
-            std_ids = std_ids[:-1]
-        return flask.render_template("enrollment.html", title="Enroll course", ids=std_ids, crs_id=crs_id)
-    else:
-        crs_id = flask.request.form['crs_id']
-        std_ids = flask.request.form['std_ids']
-        query = "SELECT student_id, course_id, id FROM learn_manage.enrollments WHERE course_id=%s"
-        value = (crs_id,)
-        cursor.execute(query, value)
-        result = cursor.fetchall()
-        std_ids_list = std_ids.split(' ')
-        for std_id in std_ids_list:
-            if not std_id.isnumeric():
-                return flask.jsonify({'status': 'error', 'message': 'Invalid format.'})
-            else:
-                query = "SELECT id FROM learn_manage.users WHERE id=%s AND role_id=%s"
-                value = (int(std_id), 1)
-                cursor.execute(query, value)
-                result2 = cursor.fetchone()
-                if result2 is None:
-                    return flask.jsonify({'status': 'error', 'message': 'Invalid Student ID.'})
-        try:
-            print("Are you ok?")
-            if result:
-                print("wtf", result)
-                ori_ids = [t[0] for t in result]
-                for ori_erl in result:
-                    if ori_erl[0] not in std_ids_list:
-                        query = "DELETE FROM learn_manage.enrollments WHERE id=%s"
-                        value = (int(ori_erl[2]),)
-                        cursor.execute(query, value)
-                        cnx.commit()
-                    for std_id in std_ids_list:
-                        if std_id not in ori_ids:
-                            date = datetime.now()
-                            query = (
-                                "INSERT INTO learn_manage.enrollments (student_id, course_id, enrollment_date, status) "
-                                "VALUES (%s, %s, %s, %s)")
-                            value = (int(std_id), crs_id, date.strftime("%Y-%m-%d"), "received")
-                            cursor.execute(query, value)
-                            cnx.commit()
-                return flask.jsonify({'status': 'success', 'message': 'Success.'})
-            else:
-                try:
-                    for std_id in std_ids_list:
-                        print("?????")
-                        date = datetime.now()
-                        query = (
-                            "INSERT INTO learn_manage.enrollments (student_id, course_id, enrollment_date, status) VALUES "
-                            "(%s, %s, %s, %s)")
-                        value = (int(std_id), crs_id, date.strftime("%Y-%m-%d"), "received")
-                        cursor.execute(query, value)
-                        cnx.commit()
-                    return flask.jsonify({'status': 'success', 'message': 'Success.'})
-                except Exception as e:
-                    cnx.rollback()
-                    return jsonify({'status': 'error', 'message': f'{e} occurred, please try again.'})
-        except Exception as e:
-            cnx.rollback()
-            return jsonify({'status': 'error', 'message': f'{e} occurred, please try again.'})
+# @app.route('/course/enroll', methods=['GET', 'POST'])
+# def enroll_course():
+#     if 'userid' not in session or session["role_id"] != 0:
+#         return jsonify({'status': 'unauthenticated', 'message': 'You do not have access to perform this operation'})
+#
+#     if flask.request.method == 'GET':
+#         crs_id = flask.request.args['id']
+#         query = "SELECT student_id, course_id, id FROM learn_manage.enrollments WHERE course_id=%s"
+#         value = (crs_id,)
+#         cursor.execute(query, value)
+#         result = cursor.fetchall()
+#         std_ids = ''
+#         print(result)
+#         if result is not None:
+#             for erl in result:
+#                 std_ids = std_ids + str(erl[0]) + ' '
+#             std_ids = std_ids[:-1]
+#         return flask.render_template("enrollment.html", title="Enroll course", ids=std_ids, crs_id=crs_id)
+#     else:
+#         crs_id = flask.request.form['crs_id']
+#         std_ids = flask.request.form['std_ids']
+#         query = "SELECT student_id, course_id, id FROM learn_manage.enrollments WHERE course_id=%s"
+#         value = (crs_id,)
+#         cursor.execute(query, value)
+#         result = cursor.fetchall()
+#         std_ids_list = std_ids.split(' ')
+#         for std_id in std_ids_list:
+#             if not std_id.isnumeric():
+#                 return flask.jsonify({'status': 'error', 'message': 'Invalid format.'})
+#             else:
+#                 query = "SELECT id FROM learn_manage.users WHERE id=%s AND role_id=%s"
+#                 value = (int(std_id), 1)
+#                 cursor.execute(query, value)
+#                 result2 = cursor.fetchone()
+#                 if result2 is None:
+#                     return flask.jsonify({'status': 'error', 'message': 'Invalid Student ID.'})
+#         try:
+#             if result:
+#                 print("wtf", result)
+#                 ori_ids = [t[0] for t in result]
+#                 for ori_erl in result:
+#                     if ori_erl[0] not in std_ids_list:
+#                         query = "DELETE FROM learn_manage.enrollments WHERE id=%s"
+#                         value = (int(ori_erl[2]),)
+#                         cursor.execute(query, value)
+#                         cnx.commit()
+#                     for std_id in std_ids_list:
+#                         if std_id not in ori_ids:
+#                             date = datetime.now()
+#                             query = (
+#                                 "INSERT INTO learn_manage.enrollments (student_id, course_id, enrollment_date, status) "
+#                                 "VALUES (%s, %s, %s, %s)")
+#                             value = (int(std_id), crs_id, date.strftime("%Y-%m-%d"), "received")
+#                             cursor.execute(query, value)
+#                             cnx.commit()
+#                 return flask.jsonify({'status': 'success', 'message': 'Success.'})
+#             else:
+#                 try:
+#                     for std_id in std_ids_list:
+#                         print("?????")
+#                         date = datetime.now()
+#                         query = (
+#                             "INSERT INTO learn_manage.enrollments (student_id, course_id, enrollment_date, status) VALUES "
+#                             "(%s, %s, %s, %s)")
+#                         value = (int(std_id), crs_id, date.strftime("%Y-%m-%d"), "received")
+#                         cursor.execute(query, value)
+#                         cnx.commit()
+#                     return flask.jsonify({'status': 'success', 'message': 'Success.'})
+#                 except Exception as e:
+#                     cnx.rollback()
+#                     return jsonify({'status': 'error', 'message': f'{e} occurred, please try again.'})
+#         except Exception as e:
+#             cnx.rollback()
+#             return jsonify({'status': 'error', 'message': f'{e} occurred, please try again.'})
 
 
 @app.route("/assignment", methods=['GET'])
@@ -649,7 +689,7 @@ def forum_spec(forum_id):
 
 @app.route("/assignment/create", methods=['GET', 'POST'])
 def create_assignment():
-    if 'userid' not in session or session["role_id"] != 0:
+    if 'userid' not in session or session["role_id"] not in (0, 2):
         return jsonify({'status': 'unauthenticated', 'message': 'You do not have access to perform this operation'})
     if flask.request.method == 'GET':
         return flask.render_template("assignment.html", title="Create new assignment", edit=False)
@@ -720,7 +760,7 @@ def edit_assignment():
 
 @app.route("/lecture/delete", methods=['GET', 'POST'])
 def delete_lecture():
-    if 'userid' not in session or session["role_id"] != 0:
+    if 'userid' not in session or session["role_id"] not in (0, 2):
         return jsonify({'status': 'unauthenticated', 'message': 'You do not have access to perform this operation'})
     try:
         lec_id = flask.request.args['id']
@@ -728,7 +768,10 @@ def delete_lecture():
         value = (lec_id,)
         cursor.execute(query, value)
         cnx.commit()
-        return flask.redirect("/lecture")
+        if session['role_id'] == 0:
+            return flask.redirect("/lecture")
+        elif session['role_id'] == 2:
+            return flask.redirect("/")
     except Exception as e:
         cnx.rollback()
         print(e)
@@ -757,10 +800,14 @@ def delete_forum():
 
 @app.route("/lecture/create", methods=['GET', 'POST'])
 def create_lecture():
-    if 'userid' not in session or session["role_id"] != 0:
+    if 'userid' not in session or session["role_id"] not in (0, 2):
         return jsonify({'status': 'unauthenticated', 'message': 'You do not have access to perform this operation'})
     if request.method == 'GET':
-        return flask.render_template("lecture_window.html", title="Create new lecture", edit=False)
+        if session['role_id'] == 0:
+            return flask.render_template("lecture_window.html", title="Create new lecture", edit=False)
+        else:
+            crs_id = request.args['id']
+            return flask.render_template("lecture_window.html", title="Create new lecture", edit=False, crs_id=crs_id)
     else:
         try:
             lec_title = flask.request.form['lec_title']
@@ -768,7 +815,6 @@ def create_lecture():
             print(f"There are files in the request: {lec_title}, {crs_id}")
             for k, v in request.files.items():
                 print(k, v)
-            print("That's all")
             rse = flask.request.files['rse']
             print("Hello", rse)
             if rse.filename != '':
@@ -818,7 +864,7 @@ def create_forum():
 
 @app.route('/lecture/edit', methods=['GET', 'POST'])
 def edit_lecture():
-    if 'userid' not in session or session["role_id"] != 0:
+    if 'userid' not in session or session["role_id"] not in (0, 2):
         return jsonify({'status': 'unauthenticated', 'message': 'You do not have access to perform this operation'})
     if flask.request.method == 'GET':
         lec_id = flask.request.args['id']
@@ -901,9 +947,12 @@ def edit_forum():
 
 @app.route('/messages', methods=['GET'])
 def get_messages():
-    if 'userid' not in session:
+    if 'userid' not in session or session["role_id"] == 0:
         return flask.redirect("/login")
-    info = fill_bar(session['userid'])
+    if session['role_id'] == 1:
+        info = fill_bar_stu(session['userid'])
+    else:
+        info = fill_bar_ins(session['userid'])
     search_key = request.args.get('items_keyword')
     if search_key is None or search_key == '':
         query = (
@@ -930,8 +979,12 @@ def get_messages():
         value = (session['userid'], f'%{search_key}%', f'%{search_key}%')
     cursor.execute(query, value)
     results = cursor.fetchall()
-    return flask.render_template("non_admin_table.html", items=results, type='messages', firstname=session['name'],
+    if session['role_id'] == 1:
+        return flask.render_template("non_admin_table.html", items=results, type='messages', firstname=session['name'],
                                  courses=info[0], grades=info[1], assignments=info[2], forums=info[3])
+    else:
+        return flask.render_template("ins_table.html", items=results, type='messages', firstname=session['name'],
+                                     courses=info[0], assignments=info[1], edit=True)
 
 
 @app.route('/messages/create', methods=['GET', 'POST'])
@@ -979,20 +1032,35 @@ def delete_message():
 def get_course(crs_id):
     if 'userid' not in session:
         return flask.redirect("/login")
-    info = fill_bar(session['userid'])
-    ids = []
-    for c_id in info[0]:
-        ids.append(c_id[4])
-    print(ids)
-    if int(crs_id) not in ids:
-        print(crs_id, "??")
-        return flask.abort(404)
-    query = "SELECT id, name, resource_url, description, upload_date FROM learn_manage.lectures WHERE course_id=%s"
-    value = (crs_id,)
-    cursor.execute(query, value)
-    lec = cursor.fetchall()
-    return flask.render_template("non_admin_table.html", items=lec, type='lecture', firstname=session['name'],
-                                 courses=info[0], grades=info[1], assignments=info[2], forums=info[3])
+    if session['role_id'] == 1:
+        info = fill_bar_stu(session['userid'])
+        ids = []
+        for c_id in info[0]:
+            ids.append(c_id[4])
+        print(ids)
+        if int(crs_id) not in ids:
+            return flask.abort(404)
+        query = "SELECT id, name, resource_url, description, upload_date FROM learn_manage.lectures WHERE course_id=%s"
+        value = (crs_id,)
+        cursor.execute(query, value)
+        lec = cursor.fetchall()
+        return flask.render_template("non_admin_table.html", items=lec, type='lecture', firstname=session['name'],
+                                     courses=info[0], grades=info[1], assignments=info[2], forums=info[3],
+                                     role=session['role_id'])
+    elif session['role_id'] == 2:
+        info = fill_bar_ins(session['userid'])
+        ids = []
+        for c_id in info[0]:
+            ids.append(c_id[2])
+        print(ids)
+        if int(crs_id) not in ids:
+            return flask.abort(404)
+        query = "SELECT l.id, l.name, l.resource_url, l.description, l.upload_date FROM learn_manage.lectures AS l INNER JOIN learn_manage.courses AS c ON l.course_id = c.id INNER JOIN learn_manage.ins_crs_assignments AS i ON i.crs_id = c.id WHERE i.ins_id = %s AND l.course_id = %s"
+        value = (session['userid'], crs_id)
+        cursor.execute(query, value)
+        lec = cursor.fetchall()
+        return flask.render_template("ins_table.html", edit=True, items=lec, type='lecture', firstname=session['name'],
+                                     courses=info[0], assignments=info[1], crs_id=crs_id)
 
 
 @app.route('/course/enroll/request', methods=['GET'])
@@ -1035,7 +1103,7 @@ def student_enroll():
     if 'userid' not in session or session["role_id"] != 1:
         return flask.redirect("/login")
 
-    info = fill_bar(session['userid'])
+    info = fill_bar_stu(session['userid'])
 
     search_key = request.args.get('items_keyword')
     if search_key is None or search_key == '':
@@ -1128,7 +1196,7 @@ def course_enroll_deny():
 def forum_list():
     if 'userid' not in session or session["role_id"] != 1:
         return flask.redirect("/login")
-    info = fill_bar(session['userid'])
+    info = fill_bar_stu(session['userid'])
     search_key = request.args.get('items_keyword')
     if search_key is None or search_key == '':
         query = ("SELECT f.id, f.name "
@@ -1183,7 +1251,7 @@ def forum_view(frm_id):
     if 'userid' not in session or session["role_id"] != 1:
         return flask.redirect("/login")
     search_key = request.args.get('items_keyword')
-    info = fill_bar(session['userid'])
+    info = fill_bar_stu(session['userid'])
     query = "SELECT id, name FROM learn_manage.forums WHERE id=%s"
     value = (int(frm_id),)
     cursor.execute(query, value)
@@ -1236,9 +1304,9 @@ def forum_poster_detail():
     if 'userid' not in session or session["role_id"] != 1:
         return flask.redirect("/login")
     if request.method == 'GET':
-        info = fill_bar(session['userid'])
+        info = fill_bar_stu(session['userid'])
         pst_id = request.args['id']
-        query = ("SELECT CONCAT_WS(' ', u.firstname, u.lastname), p.content, p.date, p.id "
+        query = ("SELECT CONCAT_WS(' ', u.firstname, u.lastname), p.content, p.date, p.id, p.forum_id "
                  "FROM learn_manage.forum_posts AS p "
                  "INNER JOIN learn_manage.users AS u ON u.id = p.poster_id "
                  "WHERE p.id=%s ")
@@ -1251,7 +1319,8 @@ def forum_poster_detail():
         comments = cursor.fetchall()
 
         return flask.render_template("post_detail.html", firstname=session['name'], post=con,
-                                     courses=info[0], grades=info[1], assignments=info[2], forums=info[3], cmts=comments)
+                                     courses=info[0], grades=info[1], assignments=info[2], forums=info[3],
+                                     cmts=comments)
     else:
         cmt = request.form['cmt']
         pst_id = request.form['pst_id']
@@ -1267,6 +1336,258 @@ def forum_poster_detail():
             return flask.redirect(f"/forum/poster/detail?id={pst_id}")
 
 
+@app.route('/assignment/<asn_id>', methods=['GET', 'POST'])
+def assignment_details(asn_id):
+    if 'userid' not in session:
+        return flask.redirect("/login")
+    elif session["role_id"] == 1:
+        if flask.request.method == 'GET':
+            info = fill_bar_stu(session['userid'])
+            ids = []
+            for a_id in info[2]:
+                ids.append(a_id[2])
+            print(ids)
+            if int(asn_id) not in ids:
+                return flask.abort(404)
+            query = ("SELECT a.*, CONCAT_WS(' ', c.name, c.session) FROM learn_manage.assignments AS a INNER JOIN "
+                     "learn_manage.courses AS c ON c.id = a.course_id WHERE a.id = %s")
+            value = (int(asn_id),)
+            cursor.execute(query, value)
+            items = cursor.fetchone()
+            return flask.render_template("assignment_stu.html", items=items, firstname=session['name'],
+                                         courses=info[0], grades=info[1], assignments=info[2], forums=info[3])
+        else:
+            for k, v in request.files.items():
+                print(k, v)
+            try:
+                asn_file = flask.request.files['asn_file']
+                if asn_file.filename != '':
+                    filename = secure_filename(asn_file.filename)
+                else:
+                    filename = "new_submission"
+                asn_url = os.path.join('static\\files', filename)
+                asn_file.save(asn_url)
+                date = datetime.now().strftime("%Y-%m-%d")
+                query = ("INSERT INTO learn_manage.submissions (assignment_id, student_id, submission_date, "
+                         "attach_file) VALUES (%s, %s, %s, %s)")
+                value = (int(asn_id), session['userid'], date, asn_url)
+                cursor.execute(query, value)
+                cnx.commit()
+                return flask.jsonify({'status': 'success', 'message': 'You have successfully submitted'})
+            except Exception as e:
+                cnx.rollback()
+                return flask.jsonify({'status': 'error', 'message': str(e)})
+    elif session["role_id"] == 2:
+        if flask.request.method == 'GET':
+            info = fill_bar_ins(session['userid'])
+            ids = []
+            for a_id in info[0]:
+                ids.append(a_id[-1])
+            print(ids)
+            if int(asn_id) not in ids:
+                print(int(asn_id))
+                return flask.abort(404)
+            query = "SELECT s.id, CONCAT_WS(' ', u.firstname, u.lastname), s.submission_date, s.attach_file FROM learn_manage.submissions AS s INNER JOIN learn_manage.users AS u ON u.id = s.student_id INNER JOIN learn_manage.assignments AS a ON a.id=s.assignment_id WHERE a.course_id=%s"
+            value = (int(asn_id),)
+            try:
+                cursor.execute(query, value)
+                items = cursor.fetchall()
+            except Exception as e:
+                print(e)
+                return flask.abort(404)
+            return flask.render_template("ins_table.html", items=items, firstname=session['name'], courses=info[0],
+                                         assignments=info[1], edit=False, type='submission')
+
+
+@app.route('/grade/<sub_id>', methods=['GET'])
+def submission_details(sub_id):
+    if 'userid' not in session or session["role_id"] != 1:
+        return flask.redirect("/login")
+    info = fill_bar_stu(session['userid'])
+    query = ("SELECT CONCAT_WS(' ',a.name, c.name, c.session), s.score, s.feedback FROM learn_manage.submissions AS s "
+             "INNER JOIN learn_manage.assignments AS a ON a.id = s.assignment_id INNER JOIN learn_manage.courses AS c "
+             "ON c.id = a.course_id WHERE s.id = %s AND s.student_id=%s AND s.score IS NOT NULL")
+    value = (int(sub_id), session['userid'])
+    cursor.execute(query, value)
+    items = cursor.fetchone()
+    return flask.render_template("grade.html", items=items, firstname=session['name'], courses=info[0], grades=info[1],
+                                 assignments=info[2], forums=info[3])
+
+
+@app.route('/notification', methods=['GET'])
+def notification():
+    if 'userid' not in session or session["role_id"] not in (1, 2):
+        return flask.redirect("/login")
+    if session["role_id"] == 1:
+        info = fill_bar_stu(session['userid'])
+    else:
+        info = fill_bar_ins(session['userid'])
+    search_key = request.args.get('items_keyword')
+    if search_key is None or search_key == '':
+        if session["role_id"] == 1:
+            query = "SELECT n.id, CONCAT_WS(' ', u.firstname, u.lastname), n.title, n.send_date FROM learn_manage.users AS u INNER JOIN learn_manage.notifications AS n ON u.id = n.sender_id INNER JOIN learn_manage.enrollments AS e ON e.course_id = n.crs_id AND e.student_id = %s"
+        else:
+            query = "SELECT id, title, send_date FROM learn_manage.notifications WHERE sender_id = %s"
+
+        value = (int(session['userid']),)
+    else:
+        query = "SELECT n.id, CONCAT_WS(' ', u.firstname, u.lastname), n.title, n.send_date FROM learn_manage.users AS u INNER JOIN learn_manage.notifications AS n ON u.id = n.sender_id INNER JOIN learn_manage.enrollments AS e ON e.course_id = n.crs_id AND e.student_id = %s WHERE n.title LIKE %s OR n.content LIKE %s"
+        value = (int(session['userid']), f'%{search_key}%', f'%{search_key}%')
+    cursor.execute(query, value)
+    items = cursor.fetchall()
+    if session['role_id'] == 1:
+        return flask.render_template("non_admin_table.html", items=items, type='notification', firstname=session['name'],
+                                 courses=info[0], grades=info[1], assignments=info[2], forums=info[3])
+    else:
+        return flask.render_template("ins_table.html", items=items, type='notification',
+                                     firstname=session['name'], edit=True,
+                                     courses=info[0], assignments=info[1])
+
+
+@app.route('/notification/view', methods=['GET', 'POST'])
+def notification_view():
+    if 'userid' not in session or session["role_id"] not in (1, 2):
+        return flask.redirect("/login")
+    notification_id = request.args.get('id')
+    if notification_id is None:
+        return flask.redirect("/notification")
+    query = ("SELECT CONCAT_WS(' ', u.firstname, u.lastname), n.title, n.content, n.send_date FROM "
+             "learn_manage.notifications AS n INNER JOIN learn_manage.users AS u ON n.sender_id = u.id WHERE n.id=%s")
+    value = (notification_id,)
+    cursor.execute(query, value)
+    notification_info = cursor.fetchone()
+    if notification_info is None:
+        return flask.abort(404)
+    return flask.render_template("notification_window.html", info=notification_info)
+
+
+@app.route('/student/<crs_id>', methods=['GET'])
+def students(crs_id):
+    if 'userid' not in session or session["role_id"] != 2:
+        return flask.redirect("/login")
+    search_key = request.args.get('items_keyword')
+    info = fill_bar_ins(session['userid'])
+    if search_key is None or search_key == '':
+        query = "SELECT u.id, u.firstname, u.lastname FROM learn_manage.users AS u INNER JOIN learn_manage.enrollments AS e ON e.student_id=u.id WHERE e.course_id = %s AND e.status = %s"
+        value = (crs_id, "received")
+    else:
+        query = "SELECT u.id, u.firstname, u.lastname FROM learn_manage.users AS u INNER JOIN learn_manage.enrollments AS e ON e.student_id=u.id WHERE e.course_id = %s AND e.status = %s AND (u.firstname LIKE %s OR u.lastname LIKE %s)"
+        value = (crs_id, "received", f'%{search_key}%', f'%{search_key}%')
+    try:
+        cursor.execute(query, value)
+        items = cursor.fetchall()
+        return flask.render_template("ins_table.html", items=items, firstname=session['name'], type='student',
+                                     courses=info[0], assignments=info[1])
+    except Exception as e:
+        print(e)
+        return flask.abort(404)
+
+
+@app.route('/submission/eval', methods=['GET', 'POST'])
+def eval_submission():
+    if 'userid' not in session or session["role_id"] != 2:
+        return jsonify({'status': 'unauthenticated', 'message': 'You do not have access to perform this operation'})
+    if flask.request.method == 'GET':
+        sub_id = flask.request.args.get('id')
+        query = "SELECT id, assignment_id, score, feedback FROM learn_manage.submissions WHERE id = %s"
+        value = (sub_id,)
+        try:
+            cursor.execute(query, value)
+            items = cursor.fetchone()
+        except Exception as e:
+            print(e)
+            return flask.abort(404)
+        if items[2] is None or items[3] is None or items[2] == '' or items[3] == '':
+            return flask.render_template("eval_window.html", s_id=items[0], a_id=items[1])
+        else:
+            return flask.render_template("eval_window.html", s_id=items[0], a_id=items[1], score=items[2], fb=items[3])
+    else:
+        sub_id = flask.request.form.get('s_id')
+        score = flask.request.form.get('score')
+        feedback = flask.request.form.get('fb')
+        query = "UPDATE learn_manage.submissions SET score = %s, feedback = %s WHERE id = %s"
+        value = (score, feedback, sub_id)
+        try:
+            cursor.execute(query, value)
+            cnx.commit()
+        except Exception as e:
+            cnx.rollback()
+            return jsonify({'status': 'error', 'message': f'{e} occurred.'})
+        return flask.jsonify({'status': 'success', 'message': 'Submission evaluated successful.'})
+
+
+@app.route('/notification/create', methods=['GET', 'POST'])
+def notification_create():
+    if 'userid' not in session or session["role_id"] != 2:
+        return jsonify({'status': 'unauthenticated', 'message': 'You do not have access to perform this operation'})
+    if flask.request.method == 'GET':
+        return flask.render_template("create_notification.html", edit=False)
+    else:
+        title = flask.request.form.get('title')
+        content = flask.request.form.get('content')
+        send_date = datetime.now().strftime('%Y-%m-%d')
+        crs_id = flask.request.form.get('crs_id')
+        query = "INSERT INTO learn_manage.notifications (title, content, send_date, crs_id, sender_id) VALUES (%s, %s, %s, %s, %s)"
+        value = (title, content, send_date, crs_id, session['userid'])
+        try:
+            cursor.execute(query, value)
+            cnx.commit()
+            return flask.jsonify({'status': 'success', 'message': 'Notification creation successful.'})
+        except Exception as e:
+            cnx.rollback()
+            return jsonify({'status': 'error', 'message': f'{e} occurred.'})
+
+@app.route('/notification/delete', methods=['GET'])
+def notification_delete():
+    if 'userid' not in session or session["role_id"] != 2:
+        return jsonify({'status': 'unauthenticated', 'message': 'You do not have access to perform this operation'})
+    ntf_id = flask.request.args.get('id')
+    query = "DELETE FROM learn_manage.notifications WHERE id = %s"
+    value = (ntf_id,)
+    return flask.redirect("/notification")
+
+@app.route('/notification/edit', methods=['GET', 'POST'])
+def notification_edit():
+    if 'userid' not in session or session["role_id"] != 2:
+        return jsonify({'status': 'unauthenticated', 'message': 'You do not have access to perform this operation'})
+    if flask.request.method == 'GET':
+        ntf_id = flask.request.args.get('id')
+        query = "SELECT content, title, crs_id FROM learn_manage.notifications WHERE id = %s"
+        value = (ntf_id,)
+        cursor.execute(query, value)
+        items = cursor.fetchone()
+        return flask.render_template("create_notification.html", id=ntf_id, content=items[0], title=items[1], crs_id=items[2], edit=True)
+    else:
+        ntf_id = flask.request.form.get('id')
+        title = flask.request.form.get('title')
+        content = flask.request.form.get('content')
+        send_date = datetime.now().strftime('%Y-%m-%d')
+        crs_id = flask.request.form.get('crs_id')
+        query = "UPDATE learn_manage.notifications SET title = %s, content = %s, send_date = %s, crs_id = %s WHERE id = %s"
+        value = (title, content, send_date, crs_id, ntf_id)
+        try:
+            cursor.execute(query, value)
+            cnx.commit()
+        except Exception as e:
+            cnx.rollback()
+            return jsonify({'status': 'error', 'message': f'{e} occurred.'})
+        return flask.jsonify({'status': 'success', 'message': 'Notification edit successful.'})
+
+
+@app.route('/forum/stu/leave', methods=['GET'])
+def forum_leave():
+    if 'userid' not in session or session["role_id"] != 1:
+        return jsonify({'status': 'unauthenticated', 'message': 'You do not have access to perform this operation'})
+    frm_id = request.args.get('id')
+    query = "DELETE FROM learn_manage.user_forum_memberships WHERE forum_id = %s AND user_id = %s"
+    value = (frm_id, session['userid'])
+    try:
+        cursor.execute(query, value)
+        cnx.commit()
+    except Exception as e:
+        cnx.rollback()
+        return jsonify({'status': 'error', 'message': f'{e} occurred.'})
+    return flask.redirect("/")
 
 if __name__ == '__main__':
     app.run()

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/admin.css') }}">
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js" async="async"></script>
+    <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
+    <title>Course console</title>
+</head>
+<body>
+<div class="admin_form" id="admin_ntf">
+    <b>{{ title }}</b>
+    <form name="admin_editor" id="ntf_editor" method="post">
+        {% if edit %}
+        <label for="n_id">ID*</label><input name="n_id" id="n_id" type="text" value="{{ id }}" readonly>
+        {% endif %}
+        <label for="title">Title*</label><input type="text" id="title" name="title" value="{{ title }}" required>
+        <label for="content">Content*</label><input type="text" id="content" name="content" value="{{ content }}" required>
+        <label for="crs_id">Course IDs*</label><input type="number" id="crs_id" name="crs_id" value="{{ crs_id }}" required>
+        <input name="ntf_submit" id="ntf_submit" type="submit" value="Submit">
+    </form>
+</div>
+</body>
+</html>

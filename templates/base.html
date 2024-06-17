@@ -10,11 +10,11 @@
 </head>
 <body>
     <header>
-    Learning Management System
-        <form method="get" name="search_box" class="top_search" action="/results">
-            <input type="text" name="keyword" id="keyword">
-            <input type="submit" name="search" id="search" value="Search">
-        </form>
+        <div onclick="window.location.href='/'">Learning Management System</div>
+{#        <form method="get" name="search_box" class="top_search" action="/results">#}
+{#            <input type="text" name="keyword" id="keyword">#}
+{#            <input type="submit" name="search" id="search" value="Search">#}
+{#        </form>#}
         <div class="user_info">
             Welcome {{ firstname }}!<br>Your role: {% block role %} {% endblock %}<br>
             <a href="/logout" id="logout">Log out</a>
