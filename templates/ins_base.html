@@ -3,9 +3,9 @@
     Instructor
 {% endblock %}
 {% block body %}
-    <button onclick="window.location.href='/messages'" type="button" style="position: fixed; top: 6rem; right: 3rem; ">Messages</button>
-    <button onclick="window.location.href='/notification'" type="button" style="position: fixed; top: 6rem; right: 10em; ">Notifications</button>
-    <div id="navigation_bar">
+    <div id="navigation_bar"><nav class="quick-links">
+    <button onclick="window.location.href='/messages'" type="button">Messages</button>
+    <button onclick="window.location.href='/notification'" type="button">Notifications</button></nav>
         <b>Courses</b>
         <ul>
             {% for course in courses %}
@@ -26,5 +26,5 @@
             {% endfor %}
         </ul>
     </div>
-    {% block content %}{% endblock %}
+    <main>{% block content %}{% endblock %}</main>
 {% endblock %}

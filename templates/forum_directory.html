@@ -1,0 +1,14 @@
+{% extends base_template %}
+{% block title %}Forums{% endblock %}
+{% block content %}
+<p class="breadcrumb"><a href="/">Home</a> / Forums</p>
+<section class="forum-board">
+  <div class="board-heading"><div><p class="eyebrow">Community</p><h1>Forums</h1><p class="muted">Browse discussion boards and connect with other learners.</p></div><div class="actions">{% for item in table.toolbar %}<a class="button" href="{{ item.url }}">{{ item.label }}</a>{% endfor %}</div></div>
+  <div class="board-search">{% include 'components/search.html' %}</div>
+  {% for row in table.rows %}
+  <article class="forum-directory-row"><span class="topic-icon" aria-hidden="true">▤</span><div class="directory-name"><h2>{{ row.cells[1].value }}</h2><p class="topic-meta">Discussion board · Forum #{{ row.cells[0].value }}</p></div>
+    <div class="actions">{% for item in row.actions %}{% if item.method == 'POST' %}<form method="post" action="{{ item.url }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="secondary" type="submit" {% if item.label == 'Delete' %}data-confirm="Delete this forum?"{% endif %}>{{ item.label }}</button></form>{% else %}<a class="button secondary" href="{{ item.url }}">{{ item.label }}</a>{% endif %}{% endfor %}</div>
+  </article>
+  {% else %}<p class="empty-state">No forums found.</p>{% endfor %}
+</section>
+{% endblock %}

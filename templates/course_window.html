@@ -1,17 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/admin.css') }}">
-    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js" async="async"></script>
-    <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
-    <title>Course console</title>
-</head>
-<body>
+{% extends "editor_base.html" %}
+{% block title %}Course console{% endblock %}
+{% block content %}
 <div class="admin_form" id="admin_crs">
     <b>{{ title }}</b>
     <form name="admin_editor" id="crs_editor" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         {% if edit %}
         <label for="c_id">ID*</label><input name="c_id" id="c_id" type="text" value="{{ id }}" readonly>
         {% endif %}
@@ -22,17 +15,4 @@
         <input name="crs_submit" id="crs_submit" type="submit" value="Submit">
     </form>
 </div>
-<script>
-        console.log(document.getElementById('crs_editor'))
-        document.getElementById('crs_editor').addEventListener('submit', function(event) {
-            let inputVal = document.getElementById('ins_ids').value;
-            let regex = /^(\d+\s)*\d+$/;
-
-            if (!regex.test(inputVal)) {
-                event.preventDefault();
-                alert('Invalid IDs. Please enter numbers separated by spaces in Instructors\' IDs');
-            }
-        });
-</script>
-</body>
-</html>
+{% endblock %}

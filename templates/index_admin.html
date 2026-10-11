@@ -1,17 +1,15 @@
 {% extends "adminbase.html" %}
-{% block js %}
-    <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
-{% endblock %}
+
 {% block title %}
 	Homepage for Admin
 {% endblock %}
 {% block content %}
-    <p style="position: fixed; top: 8rem"><a href="/">Home</a></p>
+    <p><a href="/">Home</a></p>
 <div id="dashboard">
-    <b>Administrator Dashboard</b>
+    <h1>Administrator dashboard</h1>
     <div>Total registered users<br><b>{{ total_users }}</b></div>
-    <div>Forum speech rate<br><b>{{ speech_rate }}</b></div>
-    <div>Assignment completion rate<br><b>{{ assign_rate }}</b></div>
+    <div>Posts per forum member<br><b>{{ '%.2f'|format(speech_rate) }}</b></div>
+    <div>Submissions per assignment<br><b>{{ '%.2f'|format(assign_rate) }}</b></div>
     <div>Total courses<br><b>{{ total_courses }}</b></div>
 </div>
 {% endblock %}

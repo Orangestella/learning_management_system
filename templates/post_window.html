@@ -1,21 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/admin.css') }}">
-    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js" async="async"></script>
-    <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
-    <title>Course console</title>
-</head>
-<body>
+{% extends "editor_base.html" %}
+{% block title %}New topic{% endblock %}
+{% block content %}
 <div class="admin_form" id="stu_pst">
     <b>{{ title }}</b>
-    <form name="admin_editor" id="pst_editor" method="post">
+    <form name="admin_editor" id="pst_editor" method="post" data-success-url="/forum/view/{{ frm_id }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="frm_id">Forum ID (Read Only)</label><input type="text" id="frm_id" name="frm_id" value="{{ frm_id }}" readonly>
-        <label for="content">Content*</label><input type="text" id="content" name="content" style="height:10rem" required>
+        <label for="content">Topic content*</label><textarea id="content" name="content" rows="8" maxlength="4096" required></textarea>
         <input name="pst_submit" id="pst_submit" type="submit" value="Submit">
     </form>
 </div>
-</body>
-</html>
+{% endblock %}

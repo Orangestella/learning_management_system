@@ -1,0 +1,31 @@
+<div class="search-widget">
+  <form class="table_search" method="get" role="search">
+    {% for key, value in request.args.items() %}{% if key not in ('search_field', 'items_keyword') %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}{% endfor %}
+    <label class="sr-only" for="search_field">Search scope</label>
+    <select name="search_field" id="search_field">
+      <option value="all">All fields</option>
+      {% for name, field in search.fields.items() %}<option value="{{ name }}" {% if search.selected == name %}selected{% endif %}>{{ field.label }}</option>{% endfor %}
+    </select>
+    <label class="sr-only" for="items_keyword">Search keywords</label>
+    <input type="search" name="items_keyword" id="items_keyword" value="{{ search.keyword }}" placeholder="Keywords or field:value" maxlength="1024">
+    <button type="submit">Search</button>
+    <button type="button" class="search-help-button secondary" aria-label="Advanced search syntax" aria-expanded="{{ 'true' if search.error else 'false' }}" aria-controls="search-help" data-search-help title="Advanced search syntax">?</button>
+    {% if search.keyword or search.selected != 'all' %}<a class="search-clear" href="{{ request.path }}{% if request.args.get('id') %}?id={{ request.args.get('id')|urlencode }}{% endif %}">Clear</a>{% endif %}
+  </form>
+  {% if search.error %}<p role="alert" class="search-error">{{ search.error }}</p>{% endif %}
+  <div id="search-help" class="search-help" {% if not search.error %}hidden{% endif %}>
+    <h2>Advanced search syntax</h2>
+    <p>Enter keywords or select a search scope. Multiple conditions use AND by default. Use <code>OR</code> to match either group.</p>
+    <ul>
+      <li><code>{{ search.example }}</code>: search specific fields; quote phrases containing spaces.</li>
+      <li><code>-keyword</code> or <code>-field:value</code>: exclude matches.</li>
+      <li><code>id:1 OR id:2</code>: ID 1 or 2. <code>id:>=2</code>: numeric ranges.</li>
+      <li>Text uses contains matching. <code>field:=value</code> matches exactly. <code>%</code> and <code>_</code> are literal characters.</li>
+      {% if search.date_field %}<li>Dates use <code>YYYY-MM-DD</code>. Example: <code>{{ search.date_field }}:>=2026-01-01 {{ search.date_field }}:&lt;2027-01-01</code>.</li>{% endif %}
+      {% if 'role' in search.fields %}<li>Roles: <code>admin</code>, <code>student</code>, <code>instructor</code>.</li>{% endif %}
+    </ul>
+    <p>Available fields:</p>
+    <dl class="search-field-list">{% for name, field in search.fields.items() %}<div><dt><code>{{ name }}</code></dt><dd>{{ field.label }}</dd></div>{% endfor %}</dl>
+    <p class="muted">Explicit fields override the selected scope. AND takes precedence over OR. Parentheses are not supported. Legacy prefixes crs / ins / asn / lec / sen / con work on applicable pages.</p>
+  </div>
+</div>

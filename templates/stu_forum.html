@@ -1,26 +1,27 @@
 {% extends "student_base.html" %}
-{% block title %}
-	Homepage for Student
-{% endblock %}
+{% block title %}{{ frm[1] }} | Forum{% endblock %}
 {% block content %}
-<p style="position: fixed; top: 8rem"><a href="/">Home</a> &gt; Forum</p>
-<div id="dashboard" style="display: flex; flex-direction: column; align-items: center;">
-    <h2>{{ frm[1] }}</h2>
-    <div style="display: flex; justify-content: space-around; width: 100%; background: none; border: none">
-        <button onclick="window.location.href='/forum/stu/leave?id={{ frm[0] }}'" type="button" style="margin: 10px; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Leave</button>
-        <button onclick="window.open('/forum/stu/post?id={{ frm[0] }}', '_blank', 'height=500,width=500');" type="button" style="margin: 10px; padding: 10px; background-color: #008CBA; color: white; border: none; border-radius: 4px; cursor: pointer;">Post</button>
+<p class="breadcrumb"><a href="/">Home</a> / <a href="/forum/stu">Forums</a> / {{ frm[1] }}</p>
+<section class="forum-board">
+  <div class="board-heading">
+    <div><p class="eyebrow">Discussion board</p><h1>{{ frm[1] }}</h1><p class="muted">Share ideas, ask questions, and keep the conversation going.</p></div>
+    <div class="actions"><a class="button" href="/forum/stu/post?id={{ frm[0] }}">New topic</a>
+      <form action="/forum/stu/leave?id={{ frm[0] }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="secondary" type="submit" data-confirm="Leave this forum?">Leave forum</button></form>
     </div>
-    {% if posts != [] %}
+  </div>
+  <div class="board-search">{% include 'components/search.html' %}</div>
+  <div class="topic-list">
+    <div class="topic-columns"><span>Topic / author</span><span>Replies</span><span>Posted</span></div>
     {% for post in posts %}
-        <div>
-            {{ post[0] }} post at {{ post[3] }} <br><br>
-            <b>{{ post[2] }}</b> <br><br>
-            <a href="/forum/poster/detail?id={{ post[4] }}" style="color: #008CBA;">View Details</a>
-        </div>
-    {% endfor %}
-    {% else %}
-    There are no post.
-{% endif %}
-</div>
-
+    <article class="topic-row">
+      <div class="topic-summary"><span class="topic-icon" aria-hidden="true">▤</span><div>
+        <a class="topic-title" href="/forum/poster/detail?id={{ post[4] }}">{{ post[2]|truncate(100, true) }}</a>
+        <p class="topic-meta">{{ post[0] }} <span>· ID {{ post[5] }} · Topic #{{ post[4] }}</span></p>
+      </div></div>
+      <div class="topic-replies"><strong>{{ post[6] }}</strong><span> replies</span></div>
+      <time class="topic-date">{{ post[3] }}</time>
+    </article>
+    {% else %}<p class="empty-state">No topics found. Start a new discussion.</p>{% endfor %}
+  </div>
+</section>
 {% endblock %}

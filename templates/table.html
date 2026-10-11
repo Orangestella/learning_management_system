@@ -1,0 +1,25 @@
+{% extends base_template %}
+{% block title %}{{ type.title() }}{% endblock %}
+{% block content %}
+<p class="breadcrumb"><a href="/">Home</a> / {{ type.title() }}</p>
+<section class="info_table_div">
+  <div class="table_head">
+    <h1>{{ type.title() }}</h1>
+    {% include 'components/search.html' %}
+    {% for item in table.toolbar %}<a class="button" href="{{ item.url }}">{{ item.label }}</a>{% endfor %}
+  </div>
+  <div class="table-scroll"><table class="info_table">
+    <thead><tr>{% for heading in table.headers %}<th scope="col">{{ heading }}</th>{% endfor %}<th scope="col">Actions</th></tr></thead>
+    <tbody>
+    {% for row in table.rows %}
+      <tr>{% for cell in row.cells %}<td>{% if cell.url %}<a href="{{ cell.url }}">Download</a>{% else %}{{ cell.value if cell.value is not none else '—' }}{% endif %}</td>{% endfor %}
+      <td><div class="actions">{% for item in row.actions %}
+        {% if item.method == 'POST' %}<form method="post" action="{{ item.url }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="secondary" {% if item.label == 'Delete' %}data-confirm="Delete this item?"{% endif %}>{{ item.label }}</button></form>
+        {% else %}<a href="{{ item.url }}">{{ item.label }}</a>{% endif %}
+      {% endfor %}</div></td></tr>
+    {% else %}<tr><td colspan="{{ table.headers|length + 1 }}" class="empty-state">No items found.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}

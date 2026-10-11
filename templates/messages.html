@@ -1,0 +1,20 @@
+{% extends base_template %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<p class="breadcrumb"><a href="/">Home</a> / Messages</p>
+<section class="message-page">
+  <div class="board-heading"><div><p class="eyebrow">Your inbox</p><h1>Messages</h1><p class="muted">Private messages sent to you, newest first.</p></div><a class="button" href="/messages/create">Write message</a></div>
+  <div class="board-search">{% include 'components/search.html' %}</div>
+  <div class="message-waterfall">
+    {% for message in items %}
+    <article class="message-item{% if message[4] == session['userid'] %} message-self{% endif %}" data-message-id="{{ message[0] }}">
+      <span class="avatar" aria-hidden="true">{{ message[1][:1]|upper }}</span>
+      <div class="message-stack"><div class="message-meta"><strong>{{ message[1] }}</strong><span>ID {{ message[4] }}</span><time>{{ message[3] }}</time></div>
+        <div class="message-bubble">{{ message[2] }}</div>
+        <div class="message-footer"><span>Message #{{ message[0] }}</span><form method="post" action="/messages/delete?id={{ message[0] }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="text-button" data-confirm="Delete this message?">Delete</button></form></div>
+      </div>
+    </article>
+    {% else %}<div class="empty-state"><h2>No messages found</h2><p>Your messages will appear here.</p></div>{% endfor %}
+  </div>
+</section>
+{% endblock %}

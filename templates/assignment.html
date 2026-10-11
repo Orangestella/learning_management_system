@@ -1,17 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/admin.css') }}">
-    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js" async="async"></script>
-    <script src="{{ url_for('static',filename='js/admin_window.js') }}"></script>
-    <title>Assignment console</title>
-</head>
-<body>
+{% extends "editor_base.html" %}
+{% block title %}Assignment console{% endblock %}
+{% block content %}
 <div class="admin_form" id="admin_asn">
     <b>{{ title }}</b>
     <form name="admin_editor" id="asn_editor" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         {% if edit %}
         <label for="a_id">ID*</label><input name="a_id" id="a_id" type="text" value="{{ a_id }}" readonly>
         {% endif %}
@@ -22,5 +15,4 @@
         <input name="asn_submit" id="asn_submit" type="submit" value="Submit">
     </form>
 </div>
-</body>
-</html>
+{% endblock %}

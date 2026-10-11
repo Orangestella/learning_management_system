@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/admin.css') }}">
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+  <title>{% block title %}Learning workspace{% endblock %}</title>
+</head>
+<body>
+  <header><a href="/" class="brand">Learning Management System</a>{% if session.get('userid') %}<div class="user_info">Personal ID: <strong>{{ session['userid'] }}</strong></div>{% endif %}</header>
+  {% block content %}{% endblock %}
+</body>
+</html>

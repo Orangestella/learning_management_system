@@ -1,26 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/admin.css') }}">
-    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    {% block js %}
-    {% endblock %}
+
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
     <header>
         <div onclick="window.location.href='/'">Learning Management System</div>
-{#        <form method="get" name="search_box" class="top_search" action="/results">#}
-{#            <input type="text" name="keyword" id="keyword">#}
-{#            <input type="submit" name="search" id="search" value="Search">#}
-{#        </form>#}
+
         <div class="user_info">
             Welcome {{ firstname }}!<br>Your role: {% block role %} {% endblock %}<br>
-            <a href="/logout" id="logout">Log out</a>
+            <span class="personal-id">Personal ID: <strong>{{ session['userid'] }}</strong></span><br>
+            <form action="/logout" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="secondary">Log out</button></form>
         </div>
     </header>
-    {% block body %}
-    {% endblock %}
+    <div class="layout">{% block body %}
+    {% endblock %}</div>
 </body>
 </html>
